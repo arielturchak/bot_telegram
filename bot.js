@@ -8,7 +8,7 @@ const {tokentiempo, tokentelegram, headers} = require('./data.js');
 const bot = new Telegraf(tokentelegram);
 
 // Cuando el bot recibe el comando /start, envía un mensaje de bienvenida
-bot.start((ctx) => ctx.reply('Bienvenido a tu bot de clima!'));
+bot.start((ctx) => ctx.reply('Bienvenido a tu bot del clima! Si qyuieres saber el clima de una ciudad, escribe "clima" y el nombre de la ciudad. Ejemplo: clima Buenos Aires'));
 
 // Cuando el bot escucha el mensaje 'clima', solicita al usuario que ingrese el nombre de una ciudad
 bot.hears('clima', (ctx) => {
@@ -19,11 +19,21 @@ bot.hears('clima', (ctx) => {
 bot.on('text', (ctx) => {
     let city = ctx.message.text;
     axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${tokentiempo}`, {headers})
-        .then(response => {
-            // Convierte la temperatura de Kelvin a Celsius y envía un mensaje con la temperatura actual en la ciudad especificada
-            let temp = response.data.main.temp - 273.15;
-            ctx.reply(`El clima en ${city} es de ${temp.toFixed(2)}°C`);
-        })
+    .then(response => {
+        let temp = response.data.main.temp - 273.15;
+        let weather = response.data.weather[0].main;
+        let icon;
+        if (weather === 'Rain') {
+            icon = '🌧';
+        } else if (temp < 10) {
+            icon = '❄️';
+        } else if (temp > 25) {
+            icon = '☀️';
+        } else {
+            icon = '⛅';
+        }
+        ctx.reply(`El clima en ${city} es de ${temp.toFixed(2)}°C ${icon}`);
+    })
         .catch(error => {
             // Si ocurre un error durante la solicitud a la API, registra el error y envía un mensaje de error
             console.error(`Error: ${error}`);
