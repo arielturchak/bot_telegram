@@ -15,6 +15,31 @@ bot.hears('clima', (ctx) => {
     ctx.reply('Ingresa el nombre de la ciudad para obtener el clima');
 });
 
+bot.command('help', (ctx) => {
+    ctx.reply('Aquí te dejo algunos comandos que puedes usar:\n\n' +
+        '/start - Inicia la conversación con el bot\n' +
+        '/help - Muestra esta ayuda\n' +
+        'Clima [nombre de la ciudad] - Muestra el clima de la ciudad especificada\n\n' +
+        'Si tienes alguna otra pregunta, no dudes en preguntar!');
+});
+
+bot.command('news', async (ctx) => {
+    try {
+        const response = await axios.get('https://newsapi.org/v2/top-headlines?country=mx&apiKey=7cc6b29c5ab64a79961bc5b2887b1ab7');
+        const articles = response.data.articles;
+        let news = '';
+
+        articles.forEach((article, index) => {
+            news += `${index + 1}. [${article.title}](${article.url})\n`;
+        });
+
+        ctx.replyWithMarkdown(news);
+    } catch (error) {
+        console.error(`Error: ${error}`);
+        ctx.reply('Ha ocurrido un error al obtener las noticias');
+    }
+});
+
 // Cuando el bot recibe un mensaje de texto (que se supone que es el nombre de una ciudad), realiza una solicitud GET a la API de OpenWeatherMap
 bot.on('text', (ctx) => {
     let city = ctx.message.text;
